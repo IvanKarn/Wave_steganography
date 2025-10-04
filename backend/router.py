@@ -7,32 +7,32 @@ async def upload_file(response: Response):
   response.status_code = status.HTTP_202_ACCEPTED
   return
 
-@api_router.post("/get_methods")
-async def upload_file(response: Response):
+@api_router.get("/get_methods")
+async def get_methods(response: Response):
   response.status_code = status.HTTP_200_OK
   return
 
 @api_router.post("/encrypt")
-async def upload_file(response: Response):
+async def encrypt(response: Response):
   response.status_code = status.HTTP_200_OK
   return
 
 @api_router.post("/decrypt")
-async def upload_file(response: Response):
+async def decrypt(response: Response):
   response.status_code = status.HTTP_200_OK
   return
 
 @api_router.post("/get_spectrogramm")
-async def upload_file(response: Response):
+async def get_spectrogramm(response: Response):
   response.status_code = status.HTTP_200_OK
   return
 
 @api_router.post("/get_graph")
-async def upload_file(response: Response):
+async def get_graph(response: Response):
   response.status_code = status.HTTP_200_OK
   return
 
 @api_router.post("/download_file")
-async def upload_file(response: Response):
+async def download_file(response: Response):
   response.status_code = status.HTTP_200_OK
   return
