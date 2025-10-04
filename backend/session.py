@@ -3,6 +3,8 @@ import settings
 from fastapi import HTTPException, status
 from models import User
 from storage import FileStorage
+from processor.processor import Processor
+from processor.lsb import lsb
 
 
 class SessionController():
@@ -35,9 +37,19 @@ class SessionController():
 
     
     user: User = User(input_file=input_file, output_file=output_file, method=method)
-
     if not self.storage.get_file_path(input_file):
         raise no_file_exception
     return user
 
+  def upload_file(self, file):
+    name = self.storage.save_file(file)
+    user: User = User(input_file=name, output_file=None, method=None)
+    return self.create_token(user)
+  
+  def get_methods(self):
+    return {0:"lsb"}
+  
+  def get_method_class(self,id) -> Processor:
+    d = {0: lsb}
+    return d[id]
   
