@@ -4,3 +4,4 @@ import os
 load_dotenv()
 
 SECRET_KEY = os.getenv("SECRET_KEY")
+STORAGE_DIR = os.getenv("STORAGE_DIR")
