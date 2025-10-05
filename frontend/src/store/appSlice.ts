@@ -64,23 +64,34 @@ export const uploadFile = createAsyncThunk('app/uploadFile', async (file: File, 
 
 export const fetchMethods = createAsyncThunk('app/fetchMethods', async (_, { rejectWithValue }) => {
   try {
-    const response = await apiClient.get<EncryptionMethod[]>('/get_methods');
-    return response.data;
+    const response = await apiClient.get('/get_methods');
+    const methodsArray = Object.entries(response.data).map(([id, name]) => ({
+      id: Number(id),
+      name: String(name),
+    }));
+    return methodsArray;
   } catch (err: any) {
     return rejectWithValue('Ошибка при получении методов.');
   }
 });
 
-export const encryptFile = createAsyncThunk('app/encryptFile', async (methodId: number, { rejectWithValue }) => {
-  try {
-    const requestBody = { id: methodId, data: "", params: {} };
-    await apiClient.post('/encrypt', requestBody);
-    // Ответ пустой, cookie сессии ОБНОВЛЯЕТСЯ браузером
-    return true;
-  } catch (err: any) {
-    return rejectWithValue('Ошибка при шифровании.');
+export const encryptFile = createAsyncThunk(
+  'app/encryptFile',
+  // Теперь он принимает объект с ID метода и сообщением
+  async ({ methodId, message }: { methodId: number; message: string }, { rejectWithValue }) => {
+    try {
+      // Формируем тело запроса, как ожидает backend (модель ProcessingData)
+      // В поле 'data' мы кладем наше секретное сообщение
+      const requestBody = { id: methodId, data: message, params: {} };
+      
+      await apiClient.post('/encrypt', requestBody);
+      // Ответ пустой, cookie сессии ОБНОВЛЯЕТСЯ браузером
+      return true;
+    } catch (err: any) {
+      return rejectWithValue('Ошибка при шифровании.');
+    }
   }
-});
+);
 
 export const decryptFile = createAsyncThunk(
   'app/decryptFile',

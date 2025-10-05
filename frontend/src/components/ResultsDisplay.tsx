@@ -28,19 +28,19 @@ export const ResultsDisplay = () => {
   // Проверяем, что все 4 набора данных загружены
   const areAllChartsReady = originalWaveform && encryptedWaveform && originalSpectrogram && encryptedSpectrogram;
 
-  if (!areAllChartsReady) {
-    return <p>Загрузка данных для графиков...</p>
-  }
+  // if (!areAllChartsReady) {
+  //   return <p>Загрузка данных для графиков...</p>
+  // }
 
   return (
     <div>
-      <h3>3. Результаты</h3>
+      {/* <h3>3. Результаты</h3>
       <div style={{ display: 'flex', justifyContent: 'space-around', flexWrap: 'wrap' }}>
         <WaveformChart chartData={originalWaveform} label="Исходная волновая форма" />
         <WaveformChart chartData={encryptedWaveform} label="Зашифрованная волновая форма" />
         <SpectrogramChart chartData={originalSpectrogram} label="Исходная спектрограмма" />
         <SpectrogramChart chartData={encryptedSpectrogram} label="Зашифрованная спектрограмма" />
-      </div>
+      </div> */}
       <button onClick={handleDownload} style={{ marginTop: '20px' }}>
         Скачать зашифрованный файл
       </button>
