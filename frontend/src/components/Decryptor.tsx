@@ -1,28 +1,27 @@
 import { useState, useEffect } from 'react';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
-import { encryptFile } from '../store/appSlice';
+import { decryptFile } from '../store/appSlice';
 
-export const MethodSelector = () => {
+export const Decryptor = () => {
   const dispatch = useAppDispatch();
-  const { encryptionMethods, encryptionStatus, error } = useAppSelector((state) => state.app);
+  const { encryptionMethods, decryptionStatus, error } = useAppSelector((state) => state.app);
   const [selectedMethod, setSelectedMethod] = useState<number | ''>('');
 
   useEffect(() => {
-    // Устанавливаем метод по умолчанию при загрузке
     if (encryptionMethods.length > 0) {
       setSelectedMethod(encryptionMethods[0].id);
     }
   }, [encryptionMethods]);
 
-  const handleEncrypt = () => {
+  const handleDecrypt = () => {
     if (selectedMethod) {
-      dispatch(encryptFile(selectedMethod));
+      dispatch(decryptFile(selectedMethod));
     }
   };
 
   return (
     <div>
-      <h3>2. Выберите метод шифрования</h3>
+      <h3>2. Выберите метод для извлечения данных</h3>
       <select 
         value={selectedMethod}
         onChange={(e) => setSelectedMethod(Number(e.target.value))}
@@ -33,10 +32,10 @@ export const MethodSelector = () => {
           </option>
         ))}
       </select>
-      <button onClick={handleEncrypt} disabled={!selectedMethod || encryptionStatus === 'loading'}>
-        {encryptionStatus === 'loading' ? 'Шифрование...' : 'Зашифровать'}
+      <button onClick={handleDecrypt} disabled={!selectedMethod || decryptionStatus === 'loading'}>
+        {decryptionStatus === 'loading' ? 'Извлечение...' : 'Извлечь сообщение'}
       </button>
-      {encryptionStatus === 'failed' && <p style={{ color: 'red' }}>{error}</p>}
+      {decryptionStatus === 'failed' && <p style={{ color: 'red' }}>{error}</p>}
     </div>
   );
 };

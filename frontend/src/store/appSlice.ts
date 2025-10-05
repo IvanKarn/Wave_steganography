@@ -1,112 +1,218 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk} from '@reduxjs/toolkit';
+import type { PayloadAction } from '@reduxjs/toolkit';
 import apiClient from '../api/apiClient';
 
+// Типы для данных
 interface EncryptionMethod {
-    id: number;
-    name: string;
+  id: number;
+  name: string;
+}
+interface WaveformResponse {
+  waveform_data: number[];
+}
+interface SpectrogramResponse {
+  spectrogram_data: number[][];
 }
 
-// Описываем тип нашего состояния для TypeScript
+// Тип состояния
 interface AppState {
-  cookie1: string | null;                                       // Переименовать?
-  cookie2: string | null;                                       // Переименовать?
-  encryptionMethods: EncryptionMethod[];
+  // Отслеживаем этапы процесса
   uploadStatus: 'idle' | 'loading' | 'succeeded' | 'failed';
-  uploadError: string | null;
+  methodsStatus: 'idle' | 'loading' | 'succeeded' | 'failed';
   encryptionStatus: 'idle' | 'loading' | 'succeeded' | 'failed';
-  encryptionError: string | null;
+  decryptionStatus: 'idle' | 'loading' | 'succeeded' | 'failed';
+  
+  // Данные
+  encryptionMethods: EncryptionMethod[];
+  originalWaveform: number[] | null;
+  encryptedWaveform: number[] | null;
+  originalSpectrogram: number[][] | null;
+  encryptedSpectrogram: number[][] | null;
+  decryptedMessage: string | null;
+
+  // Ошибки
+  error: string | null;
 }
 
-// Начальное состояние
 const initialState: AppState = {
-  cookie1: null,                                                // Переименовать?
-  cookie2: null,                                                // Переименовать?
-  encryptionMethods: [],
   uploadStatus: 'idle',
-  uploadError:  null,
+  methodsStatus: 'idle',
   encryptionStatus: 'idle',
-  encryptionError: null,
+  decryptionStatus: 'idle',
+  encryptionMethods: [],
+  originalWaveform: null,
+  encryptedWaveform: null,
+  originalSpectrogram: null,
+  encryptedSpectrogram: null,
+  decryptedMessage: null,
+  error: null,
 };
 
-// Создаем асинхронное действие (thunk) для загрузки файла
-// Это будет обрабатывать наш POST-запрос на /upload_file
-export const uploadFile = createAsyncThunk(
-  'app/uploadFile',
-  async (file: File, { rejectWithValue }) => {
+// --- Асинхронные действия (Thunks) ---
+
+export const uploadFile = createAsyncThunk('app/uploadFile', async (file: File, { rejectWithValue }) => {
+  try {
+    const formData = new FormData();
+    formData.append('file_bytes', file);
+    await apiClient.post('/upload_file', formData);
+    // Ответ пустой, cookie устанавливается браузером
+    return true;
+  } catch (err: any) {
+    return rejectWithValue('Ошибка при загрузке файла.');
+  }
+});
+
+export const fetchMethods = createAsyncThunk('app/fetchMethods', async (_, { rejectWithValue }) => {
+  try {
+    const response = await apiClient.get<EncryptionMethod[]>('/get_methods');
+    return response.data;
+  } catch (err: any) {
+    return rejectWithValue('Ошибка при получении методов.');
+  }
+});
+
+export const encryptFile = createAsyncThunk('app/encryptFile', async (methodId: number, { rejectWithValue }) => {
+  try {
+    const requestBody = { id: methodId, data: "", params: {} };
+    await apiClient.post('/encrypt', requestBody);
+    // Ответ пустой, cookie сессии ОБНОВЛЯЕТСЯ браузером
+    return true;
+  } catch (err: any) {
+    return rejectWithValue('Ошибка при шифровании.');
+  }
+});
+
+export const decryptFile = createAsyncThunk(
+  'app/decryptFile',
+  async (methodId: number, { rejectWithValue }) => {
     try {
-      const formData = new FormData();
-      formData.append('audio_file', file);
-      const response = await apiClient.post('/upload_file', formData);
-      return response.data; // Ожидаем, что сервер вернет { "cookie1": "..." }
+      const requestBody = { id: methodId, data: "", params: {} };
+      const response = await apiClient.post<{ data: string }>('/decrypt', requestBody);
+      // Ожидаем ответ вида { "data": "секретное сообщение" }
+      return response.data.data;
     } catch (err: any) {
-      return rejectWithValue(err.response.data)
+      return rejectWithValue('Ошибка при извлечении данных.');
     }
   }
 );
 
-export const fetchMethods = createAsyncThunk('app/fetchMethods', async () => {
-  const response = await apiClient.get('/get_methods');
-  return response.data.methods;
-});
+interface FetchChartDataArgs {
+  isOriginal: boolean;
+}
 
-export const encryptFile = createAsyncThunk(
-  'app/encryptFile',
-  async ({ method_id, cookie1 }: { method_id: number; cookie1: string }, { rejectWithValue }) => {
+export const fetchWaveform = createAsyncThunk(
+  'app/fetchWaveform',
+  async ({ isOriginal }: FetchChartDataArgs, { rejectWithValue }) => {
     try {
-      const response = await apiClient.post(
-        '/encrypt',
-        { method_id },
-        { headers: { 'X-File-Token': cookie1 } }
-      );
-      return response.data;
+      // Backend вернет данные для файла, на который указывает ТЕКУЩИЙ cookie
+      const response = await apiClient.post<WaveformResponse>('/get_graph');
+      return { data: response.data.waveform_data, isOriginal };
     } catch (err: any) {
-      return rejectWithValue(err.response.data)
+      return rejectWithValue('Ошибка при получении данных волновой формы.');
     }
   }
-)
+);
 
-// Создаем сам срез
+export const fetchSpectrogram = createAsyncThunk(
+  'app/fetchSpectrogram',
+  async ({ isOriginal }: FetchChartDataArgs, { rejectWithValue }) => {
+    try {
+      const response = await apiClient.post<SpectrogramResponse>('/get_spectrogramm');
+      return { data: response.data.spectrogram_data, isOriginal };
+    } catch (err: any) {
+      return rejectWithValue('Ошибка при получении данных спектрограммы.');
+    }
+  }
+);
+
+export const downloadResultFile = createAsyncThunk('app/downloadFile', async (_, { rejectWithValue }) => {
+  try {
+    const response = await apiClient.post('/download_file', {}, { responseType: 'blob' });
+    return response.data as Blob;
+  } catch (err: any) {
+    return rejectWithValue('Ошибка при скачивании файла.');
+  }
+});
+
+// --- Срез (Slice) ---
+
 const appSlice = createSlice({
   name: 'app',
   initialState,
   reducers: {
-    // Здесь можно добавлять обычные (синхронные) действия
     resetState: () => initialState,
   },
-  // Здесь мы обрабатываем состояния асинхронных действий
   extraReducers: (builder) => {
-    builder
-      // --- Обработчики для uploadFile ---
-      .addCase(uploadFile.pending, (state) => {
-        state.uploadStatus = 'loading';
-        // Сбрасываем все состояние при загрузке нового файла
-        Object.assign(state, initialState); 
-      })
-      .addCase(uploadFile.fulfilled, (state, action) => {
-        state.uploadStatus = 'succeeded';
-        state.cookie1 = action.payload.cookie1;
-      })
-      .addCase(uploadFile.rejected, (state, action) => {
-        state.uploadStatus = 'failed';
-        state.uploadError = (action.payload as any)?.message || 'Upload failed';
-      })
-      // --- Обработчики для fetchMethods ---
-      .addCase(fetchMethods.fulfilled, (state, action) => {
-        state.encryptionMethods = action.payload;
-      })
-      // --- Обработчики для encryptFile ---
-      .addCase(encryptFile.pending, (state) => {
-        state.encryptionStatus = 'loading';
-        state.encryptionError = null;
-      })
-      .addCase(encryptFile.fulfilled, (state, action) => {
-        state.encryptionStatus = 'succeeded';
-        state.cookie2 = action.payload.cookie2;
-      })
-      .addCase(encryptFile.rejected, (state, action) => {
-        state.encryptionStatus = 'failed';
-        state.encryptionError = (action.payload as any)?.message || 'Encryption failed';
-      });
+    // Upload
+    builder.addCase(uploadFile.pending, (state) => {
+      Object.assign(state, initialState); // Полный сброс при новой загрузке
+      state.uploadStatus = 'loading';
+    });
+    builder.addCase(uploadFile.fulfilled, (state) => {
+      state.uploadStatus = 'succeeded';
+    });
+    builder.addCase(uploadFile.rejected, (state, action) => {
+      state.uploadStatus = 'failed';
+      state.error = action.payload as string;
+    });
+
+    // Methods
+    builder.addCase(fetchMethods.pending, (state) => {
+      state.methodsStatus = 'loading';
+    });
+    builder.addCase(fetchMethods.fulfilled, (state, action) => {
+      state.methodsStatus = 'succeeded';
+      state.encryptionMethods = action.payload;
+    });
+    builder.addCase(fetchMethods.rejected, (state, action) => {
+      state.methodsStatus = 'failed';
+      state.error = action.payload as string;
+    });
+
+    // Encrypt
+    builder.addCase(encryptFile.pending, (state) => {
+      state.encryptionStatus = 'loading';
+    });
+    builder.addCase(encryptFile.fulfilled, (state) => {
+      state.encryptionStatus = 'succeeded';
+    });
+    builder.addCase(encryptFile.rejected, (state, action) => {
+      state.encryptionStatus = 'failed';
+      state.error = action.payload as string;
+    });
+
+    // Decrypt
+    builder.addCase(decryptFile.pending, (state) => {
+      state.decryptionStatus = 'loading';
+      state.decryptedMessage = null; // Очищаем старое сообщение
+      state.error = null;
+    });
+    builder.addCase(decryptFile.fulfilled, (state, action: PayloadAction<string>) => {
+      state.decryptionStatus = 'succeeded';
+      state.decryptedMessage = action.payload;
+    });
+    builder.addCase(decryptFile.rejected, (state, action) => {
+      state.decryptionStatus = 'failed';
+      state.error = action.payload as string;
+    });
+    
+    // Waveform
+    builder.addCase(fetchWaveform.fulfilled, (state, action) => {
+        if (action.payload.isOriginal) {
+            state.originalWaveform = action.payload.data;
+        } else {
+            state.encryptedWaveform = action.payload.data;
+        }
+    });
+
+    // Spectrogram
+    builder.addCase(fetchSpectrogram.fulfilled, (state, action) => {
+        if (action.payload.isOriginal) {
+            state.originalSpectrogram = action.payload.data;
+        } else {
+            state.encryptedSpectrogram = action.payload.data;
+        }
+    });
   },
 });
 

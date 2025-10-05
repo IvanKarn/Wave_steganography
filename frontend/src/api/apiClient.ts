@@ -1,9 +1,8 @@
 import axios from 'axios';
 
 const apiClient = axios.create({
-  // Укажите URL, по которому будет работать ваш backend
-  // В режиме разработки это может быть 'http://localhost:8000/api'
-  baseURL: '/api', // Используем относительный путь для простоты
+  baseURL: '/api', // Убедитесь, что это правильный префикс
+  withCredentials: true, // Ключевая настройка для автоматической отправки cookie
 });
 
 export default apiClient;
