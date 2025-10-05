@@ -1,19 +1,27 @@
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { WaveformChart } from './WaveformChart';
 import { SpectrogramChart } from './SpectrogramChart';
-import { downloadResultFile } from '../store/appSlice';
+import apiClient from '../api/apiClient';
+import { setDownloadPending, setDownloadSuccess, setDownloadFailed } from '../store/appSlice';
 
 export const ResultsDisplay = () => {
   const dispatch = useAppDispatch();
   const { 
     originalWaveform, encryptedWaveform,
-    originalSpectrogram, encryptedSpectrogram 
+    originalSpectrogram, encryptedSpectrogram,
+    downloadStatus,
   } = useAppSelector((state) => state.app);
   
   const handleDownload = async () => {
-    const resultAction = await dispatch(downloadResultFile());
-    if (downloadResultFile.fulfilled.match(resultAction)) {
-      const blob = resultAction.payload;
+    // 1. Сообщаем Redux, что скачивание НАЧАЛОСЬ
+    dispatch(setDownloadPending());
+
+    try {
+      // 2. Выполняем API-запрос напрямую
+      const response = await apiClient.post('/download_file', {}, { responseType: 'blob' });
+      
+      // 3. Обрабатываем успешный результат (Blob) здесь же, ВНЕ Redux
+      const blob = response.data;
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
@@ -22,6 +30,14 @@ export const ResultsDisplay = () => {
       link.click();
       link.remove();
       window.URL.revokeObjectURL(url);
+
+      // 4. Сообщаем Redux, что все прошло УСПЕШНО
+      dispatch(setDownloadSuccess());
+
+    } catch (error) {
+      // 5. Если произошла ошибка, сообщаем Redux об этом
+      console.error("Download failed:", error);
+      dispatch(setDownloadFailed('Не удалось скачать файл.'));
     }
   };
   
@@ -41,8 +57,12 @@ export const ResultsDisplay = () => {
         <SpectrogramChart chartData={originalSpectrogram} label="Исходная спектрограмма" />
         <SpectrogramChart chartData={encryptedSpectrogram} label="Зашифрованная спектрограмма" />
       </div> */}
-      <button onClick={handleDownload} style={{ marginTop: '20px' }}>
-        Скачать зашифрованный файл
+      <button 
+        onClick={handleDownload} 
+        style={{ marginTop: '20px' }}
+        disabled={downloadStatus === 'loading'}
+      >
+        {downloadStatus === 'loading' ? 'Скачивание...' : 'Скачать зашифрованный файл'}
       </button>
     </div>
   );
