@@ -4,12 +4,11 @@ from processor_controller import ProcessorController
 from fastapi.responses import FileResponse
 
 from models import ProcessingData
-
+from storage import FileStorage
 api_router = APIRouter(prefix="/api")
 
 @api_router.post("/upload_file")
 async def upload_file(response: Response, file_bytes: bytes = File()):
-  response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
   session = SessionController()
   try:
     token = session.upload_file(file_bytes)
@@ -26,21 +25,20 @@ async def get_methods(response: Response):
 
 @api_router.post("/encrypt")
 async def encrypt(response: Response, proc: ProcessingData, session = Cookie()):
-  response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
   session_c = SessionController()
   user = session_c.get_current_user(session)
-  session_c.encode(user, proc.id, proc.data, proc.params)
+  token = session_c.encode(user, proc.id, proc.data, proc.params)
+  response.set_cookie(key="session", value=token)
   response.status_code = status.HTTP_200_OK
   return
 
 @api_router.post("/decrypt")
 async def decrypt(response: Response, proc: ProcessingData, session = Cookie()):
-  response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
   session_c = SessionController()
   user = session_c.get_current_user(session)
-  session_c.decode(user, proc.id, proc.params)
+  data = session_c.decode(user, proc.id, proc.params)
   response.status_code = status.HTTP_200_OK
-  return
+  return {"data": str(data)}
 
 @api_router.post("/get_spectrogramm")
 async def get_spectrogramm(response: Response):
@@ -54,7 +52,6 @@ async def get_graph(response: Response):
 
 @api_router.post("/download_file")
 async def download_file(response: Response, session = Cookie()):
-  response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
   session_c = SessionController()
   try:
     user = session_c.get_current_user(session)
@@ -63,4 +60,4 @@ async def download_file(response: Response, session = Cookie()):
     response.status_code = status.HTTP_200_ACCEPTED
   except:
     pass
-  return FileResponse(path=user.output_file, filename='audio.wav', media_type='audio/x-wav')
+  return FileResponse(path=FileStorage().get_file_path(user.output_file), filename='audio.wav', media_type='audio/x-wav')

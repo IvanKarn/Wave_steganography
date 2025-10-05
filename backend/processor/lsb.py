@@ -34,10 +34,10 @@ class lsb(Processor):
     bit_depth = np.iinfo(samples.dtype).bits
     if samples.ndim == 2:
       for sample in samples:
-        data_bits += reversed(bin(sample[0])[-depth:])
+        data_bits += bin(sample[0])[-depth:][-1::]
     else:
       for sample in samples:
-        data_bits += reversed(bin(sample)[-depth:])
+        data_bits += bin(sample)[-depth:][-1::]
     num = int(data_bits, 2)
     num_bytes = (len(data_bits) + 7) // 8 
     byte_array = num.to_bytes(num_bytes, byteorder='big')
