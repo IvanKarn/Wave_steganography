@@ -1,6 +1,9 @@
 from fastapi import APIRouter, Response, status, File, Cookie
 from session import SessionController
+from processor_controller import ProcessorController
 from fastapi.responses import FileResponse
+
+from models import ProcessingData
 
 api_router = APIRouter(prefix="/api")
 
@@ -19,15 +22,23 @@ async def upload_file(response: Response, file_bytes: bytes = File()):
 @api_router.get("/get_methods")
 async def get_methods(response: Response):
   response.status_code = status.HTTP_200_OK
-  return
+  return ProcessorController().id_name
 
 @api_router.post("/encrypt")
-async def encrypt(response: Response):
+async def encrypt(response: Response, proc: ProcessingData, session = Cookie()):
+  response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
+  session_c = SessionController()
+  user = session_c.get_current_user(session)
+  session_c.encode(user, proc.id, proc.data, proc.params)
   response.status_code = status.HTTP_200_OK
   return
 
 @api_router.post("/decrypt")
-async def decrypt(response: Response):
+async def decrypt(response: Response, proc: ProcessingData, session = Cookie()):
+  response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
+  session_c = SessionController()
+  user = session_c.get_current_user(session)
+  session_c.decode(user, proc.id, proc.params)
   response.status_code = status.HTTP_200_OK
   return
 

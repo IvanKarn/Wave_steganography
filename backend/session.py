@@ -58,7 +58,7 @@ class SessionController():
     path = self.storage.get_file_path(user.input_file)
     user.output_file = p.encode(path,data, **params)
 
-  def decode(self, user: User, id: int, data, params: dict):
+  def decode(self, user: User, id: int, params: dict):
     no_processor_exception = HTTPException(
       status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
       detail="Something went wrong",
@@ -69,6 +69,6 @@ class SessionController():
     except:
       raise no_processor_exception
     path = self.storage.get_file_path(user.input_file)
-    data = p.decode(path, data, **params)
+    data = p.decode(path, **params)
     return data
   
