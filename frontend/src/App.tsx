@@ -1,35 +1,31 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { FileUpload } from './components/FileUpload';
+import { MethodSelector } from './components/MethodSelector';
+import { ResultsDisplay } from './components/ResultsDisplay';
+import { useAppSelector } from './store/hooks';
+import './App.css'; // Можно добавить немного стилей
 
 function App() {
-  const [count, setCount] = useState(0)
+  const { cookie1, cookie2, uploadStatus } = useAppSelector((state) => state.app);
+
+  const isFileUploaded = cookie1 && uploadStatus === 'succeeded';
+  const isEncryptionComplete = cookie2;
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <div className="App">
+      <header>
+        <h1>Стеганография в аудио</h1>
+      </header>
+      <main>
+        <FileUpload />
+        
+        {/* Показываем выбор метода только после успешной загрузки файла */}
+        {isFileUploaded && <MethodSelector />}
+        
+        {/* Показываем результаты только после успешного шифрования */}
+        {isEncryptionComplete && <ResultsDisplay />}
+      </main>
+    </div>
+  );
 }
 
-export default App
+export default App;
