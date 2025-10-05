@@ -1,6 +1,5 @@
 from abc import ABC, abstractmethod  
 
-
 class Processor(ABC):  
   @abstractmethod  
   def encode(self, path, data, **kwargs):  
@@ -8,3 +7,4 @@ class Processor(ABC):
   @abstractmethod  
   def decode(self, path, data, **kwargs):  
     pass  
+

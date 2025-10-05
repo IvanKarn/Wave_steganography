@@ -1,6 +1,6 @@
-from processor import Processor
+from processor.processor import Processor
 from scipy.io import wavfile
-from ..storage import FileStorage
+from storage import FileStorage
 import numpy as np
 
 class lsb(Processor):
