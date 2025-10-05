@@ -52,4 +52,4 @@ async def download_file(response: Response, session = Cookie()):
     response.status_code = status.HTTP_200_ACCEPTED
   except:
     pass
-  return FileResponse(path='user.output_file', filename='audio.wav', media_type='audio/x-wav')
+  return FileResponse(path=user.output_file, filename='audio.wav', media_type='audio/x-wav')

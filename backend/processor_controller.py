@@ -10,5 +10,5 @@ class ProcessorController():
     self.id_name: dict[int, str] = {i : self.processors[i][0] for i in self.processors}
     self.id_processor: dict[int, Processor] = {i : self.processors[i][1] for i in self.processors}
 
-  def generate_processor(self, id):
+  def generate_processor(self, id) -> Processor:
     return self.id_processor[id]()
