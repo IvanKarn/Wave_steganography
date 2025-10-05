@@ -14,7 +14,7 @@ export const Decryptor = () => {
   }, [encryptionMethods]);
 
   const handleDecrypt = () => {
-    if (selectedMethod) {
+    if (typeof selectedMethod === 'number') {
       dispatch(decryptFile(selectedMethod));
     }
   };
@@ -32,7 +32,7 @@ export const Decryptor = () => {
           </option>
         ))}
       </select>
-      <button onClick={handleDecrypt} disabled={!selectedMethod || decryptionStatus === 'loading'}>
+      <button onClick={handleDecrypt} disabled={selectedMethod === '' || decryptionStatus === 'loading'}>
         {decryptionStatus === 'loading' ? 'Извлечение...' : 'Извлечь сообщение'}
       </button>
       {decryptionStatus === 'failed' && <p style={{ color: 'red' }}>{error}</p>}
