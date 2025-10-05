@@ -21,6 +21,7 @@ interface AppState {
   methodsStatus: 'idle' | 'loading' | 'succeeded' | 'failed';
   encryptionStatus: 'idle' | 'loading' | 'succeeded' | 'failed';
   decryptionStatus: 'idle' | 'loading' | 'succeeded' | 'failed';
+  downloadStatus: 'idle' | 'loading' | 'succeeded' | 'failed';
   
   // Данные
   encryptionMethods: EncryptionMethod[];
@@ -39,6 +40,7 @@ const initialState: AppState = {
   methodsStatus: 'idle',
   encryptionStatus: 'idle',
   decryptionStatus: 'idle',
+  downloadStatus: 'idle',
   encryptionMethods: [],
   originalWaveform: null,
   encryptedWaveform: null,
@@ -136,14 +138,14 @@ export const fetchSpectrogram = createAsyncThunk(
   }
 );
 
-export const downloadResultFile = createAsyncThunk('app/downloadFile', async (_, { rejectWithValue }) => {
-  try {
-    const response = await apiClient.post('/download_file', {}, { responseType: 'blob' });
-    return response.data as Blob;
-  } catch (err: any) {
-    return rejectWithValue('Ошибка при скачивании файла.');
-  }
-});
+// export const downloadResultFile = createAsyncThunk('app/downloadFile', async (_, { rejectWithValue }) => {
+//   try {
+//     const response = await apiClient.post('/download_file', {}, { responseType: 'blob' });
+//     return response.data as Blob;
+//   } catch (err: any) {
+//     return rejectWithValue('Ошибка при скачивании файла.');
+//   }
+// });
 
 // --- Срез (Slice) ---
 
@@ -152,6 +154,17 @@ const appSlice = createSlice({
   initialState,
   reducers: {
     resetState: () => initialState,
+    setDownloadPending: (state) => {
+      state.downloadStatus = 'loading';
+      state.error = null;
+    },
+    setDownloadSuccess: (state) => {
+      state.downloadStatus = 'succeeded';
+    },
+    setDownloadFailed: (state, action: PayloadAction<string>) => {
+      state.downloadStatus = 'failed';
+      state.error = action.payload;
+    },
   },
   extraReducers: (builder) => {
     // Upload
@@ -227,5 +240,5 @@ const appSlice = createSlice({
   },
 });
 
-export const { resetState } = appSlice.actions;
+export const { resetState, setDownloadPending, setDownloadSuccess, setDownloadFailed } = appSlice.actions;
 export default appSlice.reducer;
