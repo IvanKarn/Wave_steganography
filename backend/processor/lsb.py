@@ -12,10 +12,6 @@ class lsb(Processor):
   def encode(self, path, data, depth=1):
     sample_rate, samples = wavfile.read(path)
     data_bits = ''.join(format(byte, '08b') for byte in data)
-    
-
-    
-    print(data_bits)
 
     data_bits += self.eof
     bit_depth = np.iinfo(samples.dtype).bits
@@ -49,8 +45,6 @@ class lsb(Processor):
     print(end)
     num = int(data_bits[:end], 2)
     num_bytes = (len(data_bits[:end]) + 7) // 8 
-    b = list(list(num.to_bytes(num_bytes, byteorder='big')))
-    print(data_bits[:end])
     byte_array = num.to_bytes(num_bytes, byteorder='big').decode('utf-8', errors="replace")
     return byte_array
     
