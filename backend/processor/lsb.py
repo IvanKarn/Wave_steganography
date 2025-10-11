@@ -7,11 +7,16 @@ class lsb(Processor):
   def __init__(self):
     super().__init__()
     self.storage = FileStorage()
-    self.eof = "00000000"
+    self.eof = bin(0xFFDEADFF)[2:]
 
   def encode(self, path, data, depth=1):
     sample_rate, samples = wavfile.read(path)
     data_bits = ''.join(format(byte, '08b') for byte in data)
+    
+
+    
+    print(data_bits)
+
     data_bits += self.eof
     bit_depth = np.iinfo(samples.dtype).bits
     if len(data_bits) > len(samples) * depth:
@@ -41,8 +46,11 @@ class lsb(Processor):
       for sample in samples:
         data_bits += bin(sample)[-depth:][-1::]
     end = data_bits.find(self.eof)
+    print(end)
     num = int(data_bits[:end], 2)
     num_bytes = (len(data_bits[:end]) + 7) // 8 
-    byte_array = num.to_bytes(num_bytes, byteorder='big').decode('utf-8')
+    b = list(list(num.to_bytes(num_bytes, byteorder='big')))
+    print(data_bits[:end])
+    byte_array = num.to_bytes(num_bytes, byteorder='big').decode('utf-8', errors="replace")
     return byte_array
     
