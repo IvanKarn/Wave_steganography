@@ -7,8 +7,8 @@ import { setDownloadPending, setDownloadSuccess, setDownloadFailed } from '../st
 export const ResultsDisplay = () => {
   const dispatch = useAppDispatch();
   const { 
-    originalWaveform, encryptedWaveform,
-    originalSpectrogram, encryptedSpectrogram,
+//   originalWaveform, encryptedWaveform,
+//    originalSpectrogram, encryptedSpectrogram,
     downloadStatus,
   } = useAppSelector((state) => state.app);
   
@@ -42,7 +42,7 @@ export const ResultsDisplay = () => {
   };
   
   // Проверяем, что все 4 набора данных загружены
-  const areAllChartsReady = originalWaveform && encryptedWaveform && originalSpectrogram && encryptedSpectrogram;
+//  const areAllChartsReady = originalWaveform && encryptedWaveform && originalSpectrogram && encryptedSpectrogram;
 
   // if (!areAllChartsReady) {
   //   return <p>Загрузка данных для графиков...</p>

@@ -31,16 +31,16 @@ function App() {
   
   // Эта логика тоже остается, но теперь она относится только к режиму шифрования.
   // Загружаем графики после шифрования.
-  useEffect(() => {
-    if (encryptionStatus === 'succeeded') {
-      // Загрузка графиков исходного файла (сразу после загрузки файла)
-      dispatch(fetchWaveform({ isOriginal: true }));
-      dispatch(fetchSpectrogram({ isOriginal: true }));
-      // Загрузка графиков зашифрованного файла (после шифрования)
-      dispatch(fetchWaveform({ isOriginal: false }));
-      dispatch(fetchSpectrogram({ isOriginal: false }));
-    }
-  }, [encryptionStatus, dispatch]);
+  // useEffect(() => {
+  //   if (encryptionStatus === 'succeeded') {
+  //     // Загрузка графиков исходного файла (сразу после загрузки файла)
+  //     dispatch(fetchWaveform({ isOriginal: true }));
+  //     dispatch(fetchSpectrogram({ isOriginal: true }));
+  //     // Загрузка графиков зашифрованного файла (после шифрования)
+  //     dispatch(fetchWaveform({ isOriginal: false }));
+  //     dispatch(fetchSpectrogram({ isOriginal: false }));
+  //   }
+  // }, [encryptionStatus, dispatch]);
   
   // Определяем, что показывать пользователю
   const isFileUploadedAndMethodsReady = uploadStatus === 'succeeded' && methodsStatus === 'succeeded';
