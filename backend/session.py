@@ -11,8 +11,8 @@ class SessionController():
     def __init__(self):
         self.storage = FileStorage()
 
-    def create_token(self, data: dict) -> str:
-        to_encode = data.copy()
+    def create_token(self, user: User) -> str:
+        to_encode = user.model_dump().copy()
         encoded_jwt = jwt.encode(
             dict(to_encode), settings.SECRET_KEY, algorithm="HS256")
         return encoded_jwt
@@ -28,7 +28,7 @@ class SessionController():
 
             input_file: str = payload.get("input_file")
             output_file: str = payload.get("output_file")
-            method: str = payload.get("method")
+            method: int = int(payload.get("method"))
 
             if input_file is None:
                 raise no_file_exception
