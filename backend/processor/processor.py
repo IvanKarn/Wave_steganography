@@ -1,10 +1,11 @@
-from abc import ABC, abstractmethod  
+from abc import ABC, abstractmethod
 
-class Processor(ABC):  
-  @abstractmethod  
-  def encode(self, path, data, **kwargs) -> str:  
-    pass  
-  @abstractmethod  
-  def decode(self, path, **kwargs) -> bytes:  
-    pass  
 
+class Processor(ABC):
+    @abstractmethod
+    def encode(self, path, data, **kwargs) -> str:
+        pass
+
+    @abstractmethod
+    def decode(self, path, **kwargs) -> bytes:
+        pass
