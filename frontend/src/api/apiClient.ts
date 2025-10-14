@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const apiClient = axios.create({
-  baseURL: '/api', // Убедитесь, что это правильный префикс
+  baseURL: '/api', // Префикс для доступа к эндпоинтам
   withCredentials: true, // Ключевая настройка для автоматической отправки cookie
 });
 

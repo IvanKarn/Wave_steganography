@@ -57,7 +57,6 @@ export const uploadFile = createAsyncThunk('app/uploadFile', async (file: File, 
     const formData = new FormData();
     formData.append('file_bytes', file);
     await apiClient.post('/upload_file', formData);
-    // Ответ пустой, cookie устанавливается браузером
     return true;
   } catch (err: any) {
     return rejectWithValue('Ошибка при загрузке файла.');
@@ -79,15 +78,11 @@ export const fetchMethods = createAsyncThunk('app/fetchMethods', async (_, { rej
 
 export const encryptFile = createAsyncThunk(
   'app/encryptFile',
-  // Теперь он принимает объект с ID метода и сообщением
   async ({ methodId, message }: { methodId: number; message: string }, { rejectWithValue }) => {
     try {
-      // Формируем тело запроса, как ожидает backend (модель ProcessingData)
-      // В поле 'data' мы кладем наше секретное сообщение
       const requestBody = { id: methodId, data: message, params: {} };
       
       await apiClient.post('/encrypt', requestBody);
-      // Ответ пустой, cookie сессии ОБНОВЛЯЕТСЯ браузером
       return true;
     } catch (err: any) {
       return rejectWithValue('Ошибка при шифровании.');
@@ -117,7 +112,6 @@ export const fetchWaveform = createAsyncThunk(
   'app/fetchWaveform',
   async ({ isOriginal }: FetchChartDataArgs, { rejectWithValue }) => {
     try {
-      // Backend вернет данные для файла, на который указывает ТЕКУЩИЙ cookie
       const response = await apiClient.post<WaveformResponse>('/get_graph');
       return { data: response.data.waveform_data, isOriginal };
     } catch (err: any) {

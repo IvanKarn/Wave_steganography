@@ -1,10 +1,11 @@
+// Пока закомментирован код, связанный с графиками
 import { useState, useEffect } from 'react';
 import { useAppDispatch, useAppSelector } from './store/hooks';
 import { FileUpload } from './components/FileUpload';
-import { MethodSelector } from './components/MethodSelector'; // Для шифрования
-import { Decryptor } from './components/Decryptor'; // Для дешифрования
-import { ResultsDisplay } from './components/ResultsDisplay'; // Результаты шифрования
-import { DecryptionResult } from './components/DecryptionResult'; // Результат дешифрования
+import { MethodSelector } from './components/MethodSelector';
+import { Decryptor } from './components/Decryptor';
+import { ResultsDisplay } from './components/ResultsDisplay';
+import { DecryptionResult } from './components/DecryptionResult';
 import { fetchMethods, fetchWaveform, fetchSpectrogram } from './store/appSlice';
 import './App.css';
 
@@ -12,7 +13,7 @@ type Mode = 'encrypt' | 'decrypt';
 
 function App() {
   const dispatch = useAppDispatch();
-  const [mode, setMode] = useState<Mode>('encrypt'); // Режим по умолчанию
+  const [mode, setMode] = useState<Mode>('encrypt');
   
   const { 
     uploadStatus, 

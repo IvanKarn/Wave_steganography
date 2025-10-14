@@ -1,7 +1,7 @@
 import React, { useRef, useEffect } from 'react';
 
 interface SpectrogramChartProps {
-  chartData: number[][]; // Двумерный массив
+  chartData: number[][];
   label: string;
 }
 
@@ -49,7 +49,7 @@ export const SpectrogramChart: React.FC<SpectrogramChartProps> = ({ chartData, l
   return (
     <div>
       <h4>{label}</h4>
-      {/* Задаем фиксированный размер для канваса, его можно адаптировать через CSS */}
+      {/* Задаем фиксированный размер для канваса, его нужно будет адаптировать через CSS */}
       <canvas ref={canvasRef} width="400" height="250" style={{ border: '1px solid black' }} />
     </div>
   );

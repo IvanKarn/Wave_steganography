@@ -3,11 +3,10 @@ import ReactDOM from 'react-dom/client';
 import App from './App.tsx';
 import './index.css';
 import { store } from './store/store.ts';
-import { Provider } from 'react-redux'; // Импортируем Provider
+import { Provider } from 'react-redux';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    {/* Оборачиваем App в Provider и передаем ему наше хранилище */}
     <Provider store={store}>
       <App />
     </Provider>
