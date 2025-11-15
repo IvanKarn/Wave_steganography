@@ -18,10 +18,36 @@ class SpreadSpectrum(Processor):
         np.random.seed(self.psp_seed)
         return np.random.choice([-1, 1], size=length)
 
+    def _string_to_bits(self, text):
+        """Преобразование строки в битовую последовательность с поддержкой Unicode"""
+        # Преобразуем текст в байты с использованием UTF-8
+        byte_data = text.encode('utf-8')
+        # Преобразуем байты в битовую строку
+        bits = ''.join(format(byte, '08b') for byte in byte_data)
+        return bits
+
+    def _bits_to_string(self, bits):
+        """Преобразование битовой последовательности в строку с поддержкой Unicode"""
+        
+        # Дополняем до кратного 8
+        padding = 8 - (len(bits) % 8)
+        if padding != 8:
+            bits += '0' * padding
+        
+        # Преобразуем биты в байты
+        byte_array = bytearray()
+        for i in range(0, len(bits), 8):
+            byte_bits = bits[i:i+8]
+            if len(byte_bits) == 8:
+                byte_val = int(byte_bits, 2)
+                byte_array.append(byte_val)
+        
+        # Декодируем байты в строку с использованием UTF-8
+        return byte_array.decode('utf-8', errors='replace')
+
     def encode(self, path, data, spread_factor=100, gain=0.02):
         """
         Кодирование данных методом расширения спектра
-        Гарантируем сохранение в целочисленном формате
         """
         sample_rate, samples = wavfile.read(path)
         
@@ -33,7 +59,8 @@ class SpreadSpectrum(Processor):
             data_str = data.decode('utf-8')
         else:
             data_str = data
-        data_bits = ''.join(format(ord(c), '08b') for c in data_str)
+            
+        data_bits = self._string_to_bits(data_str)
         data_bits += self.eof
         
         
@@ -120,8 +147,8 @@ class SpreadSpectrum(Processor):
         decoded_bits = []
         sample_index = 0
         
-        # Декодируем максимум 1000 бит для отладки
-        max_bits = 1000
+        # Декодируем максимум 10000 бит
+        max_bits = 10000
         
         for bit_num in range(max_bits):
             if sample_index + spread_factor > len(samples_float):
@@ -147,7 +174,8 @@ class SpreadSpectrum(Processor):
         bit_string = ''.join(decoded_bits)
         
         # Поиск EOF
-        eof_pos = bit_string.find(self.eof)  
+        eof_pos = bit_string.find(self.eof)
+        
         if eof_pos == -1:
             # EOF не найден, возвращаем всё что есть
             message_bits = bit_string
@@ -155,18 +183,5 @@ class SpreadSpectrum(Processor):
             message_bits = bit_string[:eof_pos]
         
         # Преобразуем биты в текст
-        # Дополняем до кратного 8
-        padding = 8 - (len(message_bits) % 8)
-        if padding != 8:
-            message_bits += '0' * padding
-            
-        # Преобразуем в байты
-        bytes_list = []
-        for i in range(0, len(message_bits), 8):
-            byte_bits = message_bits[i:i+8]
-            if len(byte_bits) == 8:
-                byte_val = int(byte_bits, 2)
-                bytes_list.append(byte_val)
-        
-        result = bytes(bytes_list).decode('utf-8', errors='replace')
+        result = self._bits_to_string(message_bits)
         return result
