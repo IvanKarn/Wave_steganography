@@ -2,12 +2,14 @@ from typing import Type
 from processor.processor import Processor
 
 from processor.lsb import Lsb
+from processor.spectrum import SpreadSpectrum
 
 
 class ProcessorController():
     def __init__(self):
         self.processors: dict[int, tuple[str, Type[Processor]]] = {
-            0: ("lsb", Lsb)
+            0: ("lsb", Lsb),
+            1: ("SpreadSpectrum", SpreadSpectrum)
         }
         self.id_name: dict[int, str] = {
             i: self.processors[i][0] for i in self.processors}
